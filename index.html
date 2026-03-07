@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Апроксимація функцій (ГА)</title>
+
+  <!-- Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body class="flex flex-col min-h-screen" style="background:#0f172a; color:#e2e8f0;">
+
+  <!-- ═══════════════════════ HEADER ═══════════════════════════════════ -->
+  <header style="background:#1e293b; border-bottom:1px solid #334155;"
+          class="px-6 py-3 flex items-center justify-between flex-shrink-0">
+
+    <div class="flex items-center gap-3">
+      <!-- Logo -->
+      <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);"
+           class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white text-sm flex-shrink-0">
+        ГА
+      </div>
+      <div>
+        <h1 id="app-title" class="text-base font-bold leading-tight">
+          Апроксимація функцій (ГА)
+        </h1>
+        <p class="text-xs" style="color:#64748b;">
+          Параметрична ідентифікація · Генетичний алгоритм · Поліноміальна апроксимація
+        </p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <span id="app-version"
+            style="background:#0f172a; border:1px solid #334155; color:#64748b;"
+            class="text-xs px-2 py-1 rounded-md font-mono">v1.0.0</span>
+      <a href="README.md" target="_blank"
+         style="color:#64748b;"
+         class="text-xs hover:text-indigo-400 transition-colors px-2 py-1">
+        README
+      </a>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════ MAIN ═════════════════════════════════════ -->
+  <main class="flex flex-1 overflow-hidden app-layout">
+
+    <!-- ─── SIDEBAR (Controls) ──────────────────────────────────────── -->
+    <aside class="sidebar overflow-y-auto flex-shrink-0 p-4 space-y-4"
+           style="background:#1e293b; border-right:1px solid #334155;">
+
+      <!-- ── Вхідні дані ──────────────────────────────────── -->
+      <section>
+        <div class="section-header">
+          <span style="width:8px;height:8px;background:#6366f1;border-radius:50%;display:inline-block;"></span>
+          Вхідні дані
+        </div>
+
+        <textarea id="data-input" class="data-input"
+                  placeholder="Введіть пари x, y (по одній на рядок):
+-3, 8.2
+-2, 3.1
+-1, 0.4
+ 0, 1.0
+ 1, 2.3
+ 2, 5.8
+ 3, 10.5
+
+Підтримуються роздільники: кома, пробіл, крапка з комою."
+        ></textarea>
+
+        <p class="text-xs mt-1" style="color:#475569;">
+          Формат: <code style="color:#818cf8;">x,y</code> &nbsp;або&nbsp;
+          <code style="color:#818cf8;">x y</code> &nbsp;або&nbsp;
+          <code style="color:#818cf8;">x;y</code> — один запис на рядок
+        </p>
+
+        <div class="flex flex-wrap gap-2 mt-2">
+          <button id="btn-load-file" class="btn btn-secondary btn-sm">
+            📁 Завантажити файл
+          </button>
+          <button id="btn-example" class="btn btn-secondary btn-sm">
+            ✨ Приклад
+          </button>
+          <button id="btn-clear" class="btn btn-danger btn-sm">
+            ✕ Очистити
+          </button>
+        </div>
+      </section>
+
+      <!-- ── Параметри ГА ─────────────────────────────────── -->
+      <section>
+        <div class="section-header">
+          <span style="width:8px;height:8px;background:#8b5cf6;border-radius:50%;display:inline-block;"></span>
+          Параметри алгоритму
+        </div>
+
+        <div class="space-y-3">
+
+          <!-- Степінь полінома -->
+          <div>
+            <label for="degree" class="block text-xs font-medium mb-1"
+                   style="color:#94a3b8;"
+                   title="Максимальний степінь апроксимуючого полінома (1–10)">
+              Степінь полінома
+              <span style="color:#475569;">ℹ</span>
+            </label>
+            <input type="number" id="degree" class="param-input"
+                   min="1" max="10" value="3" />
+            <p class="text-xs mt-0.5" style="color:#475569;">Ціле число від 1 до 10</p>
+          </div>
+
+          <!-- Розмір популяції -->
+          <div>
+            <label for="populationSize" class="block text-xs font-medium mb-1"
+                   style="color:#94a3b8;"
+                   title="Кількість хромосом (кандидатних розв'язків) у популяції">
+              Розмір популяції
+              <span style="color:#475569;">ℹ</span>
+            </label>
+            <input type="number" id="populationSize" class="param-input"
+                   min="10" max="10000" value="100" />
+            <p class="text-xs mt-0.5" style="color:#475569;">Від 10 до 10 000</p>
+          </div>
+
+          <!-- Кількість поколінь -->
+          <div>
+            <label for="generations" class="block text-xs font-medium mb-1"
+                   style="color:#94a3b8;"
+                   title="Максимальна кількість ітерацій еволюції">
+              Кількість поколінь
+              <span style="color:#475569;">ℹ</span>
+            </label>
+            <input type="number" id="generations" class="param-input"
+                   min="10" max="10000" value="300" />
+            <p class="text-xs mt-0.5" style="color:#475569;">Від 10 до 10 000</p>
+          </div>
+
+          <!-- Ймовірність мутації -->
+          <div>
+            <label for="mutationRate" class="block text-xs font-medium mb-1"
+                   style="color:#94a3b8;"
+                   title="Імовірність того, що конкретний ген хромосоми зазнає мутації">
+              Ймовірність мутації
+              <span style="color:#475569;">ℹ</span>
+            </label>
+            <input type="number" id="mutationRate" class="param-input"
+                   min="0" max="1" step="0.01" value="0.1" />
+            <p class="text-xs mt-0.5" style="color:#475569;">Від 0.0 до 1.0</p>
+          </div>
+
+          <!-- Ймовірність схрещування -->
+          <div>
+            <label for="crossoverRate" class="block text-xs font-medium mb-1"
+                   style="color:#94a3b8;"
+                   title="Ймовірність виконання схрещування двох батьківських особин">
+              Ймовірність схрещування
+              <span style="color:#475569;">ℹ</span>
+            </label>
+            <input type="number" id="crossoverRate" class="param-input"
+                   min="0" max="1" step="0.01" value="0.8" />
+            <p class="text-xs mt-0.5" style="color:#475569;">Від 0.0 до 1.0</p>
+          </div>
+
+          <!-- Кількість елітних -->
+          <div>
+            <label for="eliteCount" class="block text-xs font-medium mb-1"
+                   style="color:#94a3b8;"
+                   title="Кількість найкращих особин, що переносяться у наступне покоління без змін">
+              Кількість елітних
+              <span style="color:#475569;">ℹ</span>
+            </label>
+            <input type="number" id="eliteCount" class="param-input"
+                   min="1" max="50" value="5" />
+            <p class="text-xs mt-0.5" style="color:#475569;">Від 1 до 50</p>
+          </div>
+
+          <!-- Діапазон коефіцієнтів -->
+          <div>
+            <label class="block text-xs font-medium mb-1"
+                   style="color:#94a3b8;"
+                   title="Початковий діапазон пошуку для коефіцієнтів полінома">
+              Діапазон коефіцієнтів
+              <span style="color:#475569;">ℹ</span>
+            </label>
+            <div class="flex gap-2">
+              <div class="flex-1">
+                <input type="number" id="coefMin" class="param-input"
+                       value="-10" placeholder="мін" />
+                <p class="text-xs mt-0.5" style="color:#475569;">мінімум</p>
+              </div>
+              <div class="flex-1">
+                <input type="number" id="coefMax" class="param-input"
+                       value="10" placeholder="макс" />
+                <p class="text-xs mt-0.5" style="color:#475569;">максимум</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ── Повідомлення про помилки ─────────────────────── -->
+      <div id="error-container"></div>
+
+      <!-- ── Керування ────────────────────────────────────── -->
+      <section>
+        <div class="section-header">
+          <span style="width:8px;height:8px;background:#10b981;border-radius:50%;display:inline-block;"></span>
+          Керування
+        </div>
+
+        <!-- Прогрес -->
+        <div class="mb-3">
+          <div class="flex items-center justify-between mb-1">
+            <p id="progress-text" class="text-xs" style="color:#64748b;">
+              Готово до запуску
+            </p>
+            <span id="spinner" class="spinner text-indigo-400 hidden">⟳</span>
+          </div>
+          <div class="progress-track">
+            <div id="progress-bar" class="progress-fill" style="width:0%;"></div>
+          </div>
+        </div>
+
+        <!-- Кнопки запуску -->
+        <div class="flex gap-2 mb-2">
+          <button id="btn-run" class="btn btn-primary flex-1">
+            ▶ Запустити
+          </button>
+          <button id="btn-stop" class="btn btn-danger" disabled
+                  style="min-width:90px;"
+                  title="Зупинити після поточного покоління">
+            ■ Зупинити
+          </button>
+        </div>
+
+        <!-- Кнопки експорту -->
+        <div class="flex gap-2">
+          <button id="btn-export" class="btn btn-secondary btn-sm flex-1"
+                  title="Зберегти результати у файл results.txt">
+            ↓ Результати
+          </button>
+          <button id="btn-download-log" class="btn btn-secondary btn-sm flex-1"
+                  title="Зберегти журнал подій у файл app.log">
+            📋 Журнал
+          </button>
+        </div>
+
+      </section>
+
+    </aside><!-- end sidebar -->
+
+    <!-- ─── MAIN PANEL (Charts + Results) ───────────────────────────── -->
+    <div class="main-panel overflow-y-auto p-4 space-y-4">
+
+      <!-- ── Графіки ────────────────────────────────────────── -->
+      <div class="grid grid-cols-1 gap-4" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+
+        <!-- Апроксимація -->
+        <div class="card">
+          <div style="position:relative; height:280px;">
+            <canvas id="approx-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Збіжність -->
+        <div class="card">
+          <div style="position:relative; height:280px;">
+            <canvas id="convergence-chart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Поточний результат (live) ──────────────────────── -->
+      <div class="card">
+        <p class="text-xs font-semibold mb-3" style="color:#64748b; text-transform:uppercase; letter-spacing:.05em;">
+          Поточний результат
+        </p>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-xs mb-1" style="color:#475569;">Поліном</p>
+            <p id="live-equation" class="text-sm font-mono" style="color:#fde68a; word-break:break-all;">—</p>
+          </div>
+          <div>
+            <p class="text-xs mb-1" style="color:#475569;">Середньоквадратична похибка (MSE)</p>
+            <p id="live-mse" class="text-sm font-mono" style="color:#6ee7b7;">—</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Фінальні результати (прихована до завершення) ──── -->
+      <div id="results-panel" class="card hidden"
+           style="border-color:#4338ca;">
+
+        <div class="flex items-center gap-2 mb-4">
+          <span style="color:#818cf8; font-size:1.25rem;">✓</span>
+          <h3 class="font-bold" style="color:#818cf8;">Результати апроксимації</h3>
+        </div>
+
+        <!-- Картки метрик -->
+        <div class="grid grid-cols-4 gap-3 mb-4">
+          <div class="stat-card">
+            <p class="stat-label">MSE</p>
+            <p id="result-mse" class="stat-value" style="color:#6ee7b7;">—</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">R²</p>
+            <p id="result-r2" class="stat-value" style="color:#60a5fa;">—</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Якість</p>
+            <p id="result-quality" class="stat-value text-sm" style="color:#fbbf24;">—</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Поколінь</p>
+            <p id="result-gens" class="stat-value" style="color:#a78bfa;">—</p>
+          </div>
+        </div>
+
+        <!-- Рівняння -->
+        <div class="mb-4">
+          <p class="text-xs mb-1" style="color:#64748b;">Отриманий поліном</p>
+          <div class="equation-box">
+            <span id="result-equation">—</span>
+          </div>
+        </div>
+
+        <!-- Таблиця коефіцієнтів -->
+        <div>
+          <p class="text-xs font-semibold mb-2"
+             style="color:#64748b; text-transform:uppercase; letter-spacing:.05em;">
+            Коефіцієнти
+          </p>
+          <div style="overflow-x:auto;">
+            <table class="coef-table">
+              <thead>
+                <tr>
+                  <th>Коеф.</th>
+                  <th>Значення</th>
+                  <th>Опис</th>
+                </tr>
+              </thead>
+              <tbody id="coef-table-body">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- end results-panel -->
+
+    </div><!-- end main-panel -->
+
+  </main><!-- end main -->
+
+  <!-- ═══════════════════════ LOG PANEL ════════════════════════════════ -->
+  <div class="flex-shrink-0" style="border-top:1px solid #1e293b; background:#1e293b;">
+
+    <button id="btn-toggle-log"
+            class="w-full flex items-center justify-between px-4 py-2 text-xs transition-colors"
+            style="color:#475569;"
+            onmouseover="this.style.background='#0f172a'"
+            onmouseout="this.style.background=''"
+    >
+      <span class="flex items-center gap-2">
+        <span id="log-toggle-icon">▶</span>
+        Журнал подій
+      </span>
+      <span id="log-count"
+            style="background:#0f172a; border:1px solid #334155; color:#475569;"
+            class="text-xs px-2 py-0.5 rounded font-mono">
+        0 записів
+      </span>
+    </button>
+
+    <div id="log-panel" class="hidden overflow-y-auto px-4 py-2"
+         style="height:140px; background:#020617;">
+      <div id="log-container" class="space-y-0"></div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════ ERROR BOX STYLES ═════════════════════════ -->
+  <style>
+    .error-box {
+      background: rgba(69,10,10,.6);
+      border: 1px solid #991b1b;
+      border-radius: .5rem;
+      padding: .75rem;
+      margin-top: .25rem;
+    }
+    .error-title {
+      color: #fca5a5;
+      font-size: .8125rem;
+      font-weight: 600;
+      margin-bottom: .4rem;
+    }
+    .error-list {
+      list-style: disc;
+      padding-left: 1.2rem;
+      color: #fca5a5;
+      font-size: .75rem;
+      line-height: 1.8;
+    }
+  </style>
+
+  <!-- ═══════════════════════ APP SCRIPT ═══════════════════════════════ -->
+  <script type="module" src="js/app.js"></script>
+
+</body>
+</html>

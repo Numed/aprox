@@ -1,0 +1,63 @@
+import { info, warn } from './logger.js';
+
+let data = null;
+
+const _defaults = {
+  version: '1.0.0',
+  appName: 'Апроксимація функцій (ГА)',
+  language: 'uk',
+  theme: 'dark',
+  ui: {
+    primaryColor: '#6366f1',
+    successColor: '#10b981',
+    warningColor: '#f59e0b',
+    errorColor:   '#ef4444',
+  },
+  defaults: {
+    populationSize:   100,
+    generations:      300,
+    mutationRate:     0.1,
+    crossoverRate:    0.8,
+    polynomialDegree: 3,
+    eliteCount:       5,
+    tournamentSize:   5,
+    coefRangeMin:    -10,
+    coefRangeMax:     10,
+    patience:         60,
+  },
+  chartColors: {
+    dataPoints:  'rgba(99, 102, 241, 0.85)',
+    polynomial:  'rgba(245, 158, 11, 0.95)',
+    bestFitness: 'rgba(52, 211, 153, 0.9)',
+    avgFitness:  'rgba(251, 191, 36, 0.6)',
+  },
+  logPath:       'app.log',
+  resultsPath:   'results.txt',
+  maxLogEntries: 1000,
+};
+
+export async function loadConfig() {
+  try {
+    const response = await fetch('./config.json');
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    data = await response.json();
+    info('Конфігурацію завантажено', { version: data.version });
+  } catch (err) {
+    warn('Не вдалося завантажити config.json, використовуються значення за замовчуванням', {
+      error: err.message,
+    });
+    data = JSON.parse(JSON.stringify(_defaults));
+  }
+  return data;
+}
+
+export function getConfig(path, fallback = undefined) {
+  if (!data) return fallback;
+  const value = path.split('.').reduce(
+    (obj, key) => (obj !== null && obj !== undefined ? obj[key] : undefined),
+    data,
+  );
+  return value !== undefined ? value : fallback;
+}
