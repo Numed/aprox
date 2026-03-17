@@ -33,7 +33,7 @@ export function loadFromFile() {
   });
 }
 
-export function downloadResults(data) {
+export function downloadResults(data, version = '1.0.0') {
   const { coefficients, mse, r2, history, dataPoints, params } = data;
   const now    = new Date().toLocaleString('uk-UA');
   const deg    = coefficients.length - 1;
@@ -91,7 +91,7 @@ export function downloadResults(data) {
     return `  ${String(x).padEnd(16)} ${String(y).padEnd(16)} ${px.toFixed(6).padEnd(16)} ${err.toFixed(6)}`;
   });
 
-  const footer = ['', sep, '  Сформовано: Апроксимація функцій v1.0.0', sep];
+  const footer = ['', sep, `  Сформовано: Апроксимація функцій v${version}`, sep];
 
   const content = [
     ...header,
@@ -163,8 +163,8 @@ function _parseText(content) {
 
 function _evalPoly(coefficients, x) {
   let result = 0;
-  for (let i = 0; i < coefficients.length; i++) {
-    result += coefficients[i] * Math.pow(x, i);
+  for (let i = coefficients.length - 1; i >= 0; i--) {
+    result = result * x + coefficients[i];
   }
   return result;
 }

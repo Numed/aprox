@@ -10,8 +10,6 @@ let stopRequested = false;
 let results       = null;
 let dataPoints    = [];
 
-// ── Ініціалізація ─────────────────────────────────────────────────────────
-
 async function init() {
   await loadConfig();
 
@@ -56,7 +54,6 @@ function setVal(id, value) {
   if (el) el.value = value;
 }
 
-// ── Обробники подій ───────────────────────────────────────────────────────
 
 function bindEvents() {
   on('btn-run',          run);
@@ -78,7 +75,6 @@ function on(id, handler) {
   document.getElementById(id)?.addEventListener('click', handler);
 }
 
-// ── Запуск / Зупинка ──────────────────────────────────────────────────────
 
 async function run() {
   if (isRunning) return;
@@ -134,7 +130,6 @@ function stop() {
   showToast('Зупинка після поточного покоління…', 'warning');
 }
 
-// ── Прогрес ───────────────────────────────────────────────────────────────
 
 function onProgress({ generation, totalGenerations, bestFitness, bestMSE, bestCoefficients, history }) {
   const pct  = ((generation + 1) / totalGenerations * 100).toFixed(1);
@@ -155,7 +150,6 @@ function onProgress({ generation, totalGenerations, bestFitness, bestMSE, bestCo
   }
 }
 
-// ── Відображення результатів ──────────────────────────────────────────────
 
 function displayResults({ coefficients, mse, r2, history }) {
   updateApproximation(dataPoints, coefficients);
@@ -196,7 +190,6 @@ function displayResults({ coefficients, mse, r2, history }) {
   if (text) text.textContent = `Завершено  •  MSE: ${mse.toExponential(3)}  •  R²: ${r2.toFixed(4)}`;
 }
 
-// ── Дії кнопок ────────────────────────────────────────────────────────────
 
 function clear() {
   const inp = document.getElementById('data-input');
@@ -222,7 +215,7 @@ function exportResults() {
     return;
   }
   const params = collectParams();
-  downloadResults({ ...results, dataPoints, params });
+  downloadResults({ ...results, dataPoints, params }, getConfig('version', '1.0.0'));
 }
 
 async function loadFile() {
@@ -277,7 +270,6 @@ function toggleLog() {
   if (icon) icon.textContent = hidden ? '▶' : '▼';
 }
 
-// ── Валідація полів ───────────────────────────────────────────────────────
 
 function validateField(id) {
   const el = document.getElementById(id);
@@ -300,8 +292,6 @@ function validateField(id) {
   el.classList.toggle('is-valid',    valid);
 }
 
-// ── Збір параметрів ───────────────────────────────────────────────────────
-
 function collectParams() {
   const gi = (id) => parseInt(document.getElementById(id)?.value, 10);
   const gf = (id) => parseFloat(document.getElementById(id)?.value);
@@ -320,7 +310,6 @@ function collectParams() {
   };
 }
 
-// ── UI-утиліти ────────────────────────────────────────────────────────────
 
 function setUIRunning(running) {
   const btnRun  = document.getElementById('btn-run');
@@ -387,8 +376,6 @@ function coefLabel(i) {
   if (i === 1) return 'при x';
   return `при x^${i}`;
 }
-
-// ── Запуск ────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
   init().catch(err => {

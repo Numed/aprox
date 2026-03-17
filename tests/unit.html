@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unit-тести — Апроксимація функцій (ГА)</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+    h1 { font-size: 1.4rem; margin-bottom: 0.4rem; color: #6366f1; }
+    .subtitle { color: #64748b; font-size: 0.85rem; margin-bottom: 1.5rem; }
+    #results { margin-top: 1rem; }
+    #error-banner {
+      background: #450a0a;
+      border: 1px solid #7f1d1d;
+      border-radius: 6px;
+      padding: 1rem;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      color: #fca5a5;
+    }
+    #error-banner p { margin-bottom: 0.3rem; }
+  </style>
+</head>
+<body>
+  <h1>Unit-тести — Апроксимація функцій (ГА) v1.1.0</h1>
+  <p class="subtitle">Варіант 25 · Модульний контроль №1 · Відкрийте через локальний HTTP-сервер</p>
+  <div id="results">
+    <p style="color:#64748b">Завантаження тестів…</p>
+  </div>
+
+  <script type="module">
+    import { renderResults } from './unit.js';
+    const container = document.getElementById('results');
+    container.innerHTML = '';
+    renderResults(container);
+  </script>
+</body>
+</html>
