@@ -44,7 +44,7 @@ export function validateDataPoints(raw) {
 
     const xKey = x.toFixed(10);
     if (seenX.has(xKey)) {
-      errors.push(`Рядок ${idx + 1}: повторюване значення x = ${x} (рекомендується унікальний x)`);
+      warn(`Рядок ${idx + 1}: повторюване значення x = ${x} — дані прийнято з попередженням`);
     }
     seenX.add(xKey);
 
